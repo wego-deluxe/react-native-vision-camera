@@ -114,7 +114,7 @@ extension CameraView: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAud
       }
 
       // Init Video
-      guard let videoSettings = self.recommendedVideoSettings(videoOutput: videoOutput, fileType: fileType, videoCodec: videoCodec),
+        guard let videoSettings = self.recommendedVideoSettings(videoOutput: videoOutput, fileType: fileType, videoCodec: videoCodec) as? [String : Any],
             !videoSettings.isEmpty else {
         callback.reject(error: .capture(.createRecorderError(message: "Failed to get video settings!")))
         return
@@ -122,8 +122,7 @@ extension CameraView: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAud
 
       // get pixel format (420f, 420v, x420)
       let pixelFormat = CMFormatDescriptionGetMediaSubType(videoInput.device.activeFormat.formatDescription)
-      self.recordingSession!.initializeVideoWriter(withSettings: videoSettings,
-                                                   pixelFormat: pixelFormat)
+      self.recordingSession!.initializeVideoWriter(withSettings: videoSettings, pixelFormat: pixelFormat)
 
       // Init Audio (optional, async)
       if enableAudio {
@@ -131,7 +130,7 @@ extension CameraView: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAud
         self.activateAudioSession()
 
         if let audioOutput = self.audioOutput,
-           let audioSettings = audioOutput.recommendedAudioSettingsForAssetWriter(writingTo: fileType) {
+           let audioSettings = audioOutput.recommendedAudioSettingsForAssetWriter(writingTo: fileType) as? [String : Any] {
           self.recordingSession!.initializeAudioWriter(withSettings: audioSettings)
         }
       }
@@ -260,7 +259,7 @@ extension CameraView: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAud
     }
   }
 
-  private func recommendedVideoSettings(videoOutput: AVCaptureVideoDataOutput, fileType: AVFileType, videoCodec: AVVideoCodecType?) -> [String: Any]? {
+  private func recommendedVideoSettings(videoOutput: AVCaptureVideoDataOutput, fileType: AVFileType, videoCodec: AVVideoCodecType?) -> [AnyHashable: Any]? {
     if videoCodec != nil {
       return videoOutput.recommendedVideoSettings(forVideoCodecType: videoCodec!, assetWriterOutputFileType: fileType)
     } else {
